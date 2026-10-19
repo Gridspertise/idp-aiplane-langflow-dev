@@ -89,8 +89,6 @@ COPY --from=builder-base /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
-    && sh /tmp/install_hardened_npm.sh \
-    && rm -f /tmp/install_hardened_npm.sh \
     && useradd user -u 1000 -g 0 --no-create-home --home-dir /app/data \
     && mkdir -p /app/data /app/langflow /app/.npm \
     && chown -R 1000:0 /app/data /app/langflow /app/.npm \
