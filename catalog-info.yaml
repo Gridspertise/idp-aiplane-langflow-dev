@@ -21,5 +21,5 @@ spec:
   type: url
   owner: group:gridspertise/platform-developer
   targets:
-    - https://github.com/gridspertise/idp-aiplane-langflow-dev/tree/main/catalog/component.yaml
-    - https://github.com/gridspertise/idp-aiplane-langflow-dev/tree/main/catalog/api.yaml
+    - https://github.com/gridspertise/idp-aiplane-langflow-dev/blob/main/catalog/component.yaml
+    - https://github.com/gridspertise/idp-aiplane-langflow-dev/blob/main/catalog/api.yaml
