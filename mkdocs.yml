@@ -1,0 +1,43 @@
+site_name: idp-aiplane-langflow-dev
+
+repo_url: https://github.com/Gridspertise/idp-aiplane-langflow-dev
+repo_name: Site Sources
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+
+  logo: Images/logo-gridspertise-no-claim.svg
+  features:
+    - navigation.tabs
+
+nav:
+  - Component Documentation:
+      - Index: index.md
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+plugins:
+  - mike
+  - search
+
+extra:
+  version:
+    provider: mike

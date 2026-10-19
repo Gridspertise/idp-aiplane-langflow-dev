@@ -1,0 +1,39 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: idp-aiplane-langflow
+  namespace: gridspertise
+  description: dsa
+  links:
+    - url: https://github.com/Gridspertise/idp-aiplane-langflow-dev
+      title: langflow github repo
+      icon: github
+  annotations:
+    github.com/project-slug: gridspertise/idp-aiplane-langflow-dev
+    backstage.io/techdocs-ref: dir:..
+    #argocd/app-name: idp-aiplane-langflow
+    argocd/app-selector: idp/component=langflow # format: `label.key=label.value`
+
+    backstage.io/source-location: url:https://github.com/Gridspertise/idp-aiplane-langflow-dev
+    sonarqube.org/project-key: idp-aiplane-langflow
+    vault.io/secrets-path: gridspertise/platform/idp/langflow
+    tekton.dev/cicd : "true"
+    backstage.io/kubernetes-label-selector: idp/component=langflow
+    quay.io/repository-slug: gridspertise.platform/platform-idp-langflow
+  tags:
+    - "teamid#platform"
+    - "domainid#idp"
+    - "systemid#aiplane"
+    - "component#langflow"
+spec:
+  type: docker-image
+  lifecycle: production
+  owner: group:gridspertise/platform-developer
+  dependsOn:
+    - resource:gridspertise/idp-aiplane-langflow-infra
+    - location:gridspertise/idp-aiplane-langflow-location
+  ## TODO system must be passed as value
+  system: platform-idp-aiplane
+  providesApis:
+    - api:gridspertise/idp-aiplane-langflow-api
+  consumesApis: []

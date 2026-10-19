@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: idp-aiplane-langflow-location
+  namespace: gridspertise
+  description: langflow location 
+  links:
+    - url: https://github.com/Gridspertise/idp-aiplane-langflow-dev
+      title: langflow github repo
+      icon: github
+  annotations:
+    github.com/project-slug: gridspertise/idp-aiplane-langflow-dev
+    backstage.io/techdocs-entity: component:gridspertise/idp-aiplane-langflow
+    backstage.io/source-location: url:https://github.com/Gridspertise/idp-aiplane-langflow-dev
+  tags:
+    - "teamid#platform"
+    - "domainid#idp"
+    - "systemid#aiplane"
+    - "component#langflow"
+spec:
+  type: url
+  owner: group:gridspertise/platform-developer
+  targets:
+    - https://github.com/gridspertise/idp-aiplane-langflow-dev/tree/main/catalog/component.yaml
+    - https://github.com/gridspertise/idp-aiplane-langflow-dev/tree/main/catalog/api.yaml
