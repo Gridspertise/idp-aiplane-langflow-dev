@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
-# Build from the repository root:
-# docker build -f infrastructure/docker/Dockerfile -t langflow:ci .
+# CI build context layout:
+# Context = infrastructure/docker + contents of src/ (as assembled by the build task).
+# Simulate: mkdir /tmp/ctx && cp -R infrastructure/docker/. /tmp/ctx && cp -R src/. /tmp/ctx && docker build -t langflow:ci /tmp/ctx
 
 ARG UV_VERSION=0.10.4
 ARG PYTHON_IMAGE=registry.access.redhat.com/ubi10/python-314-minimal
@@ -38,12 +39,12 @@ FROM builder-base AS frontend-builder
 
 WORKDIR /app/src/frontend
 
-COPY src/frontend/package.json src/frontend/package-lock.json ./
+COPY frontend/package.json frontend/package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm \
     PUPPETEER_SKIP_DOWNLOAD=true npm ci
 
-COPY src/frontend/ ./
+COPY frontend/ ./
 
 RUN ESBUILD_BINARY_PATH="" NODE_OPTIONS="--max-old-space-size=4096" JOBS=1 npm run build \
     && test -s build/index.html
@@ -51,19 +52,19 @@ RUN ESBUILD_BINARY_PATH="" NODE_OPTIONS="--max-old-space-size=4096" JOBS=1 npm r
 FROM builder-base AS backend-builder
 
 COPY pyproject.toml uv.lock README.md ./
-COPY src/backend/base/pyproject.toml src/backend/base/README.md ./src/backend/base/
-COPY src/lfx/pyproject.toml src/lfx/README.md ./src/lfx/
-COPY src/sdk/pyproject.toml src/sdk/README.md ./src/sdk/
-COPY src/langflow-stepflow/pyproject.toml src/langflow-stepflow/README.md ./src/langflow-stepflow/
-COPY src/bundles/ ./src/bundles/
+COPY backend/base/pyproject.toml backend/base/README.md ./src/backend/base/
+COPY lfx/pyproject.toml lfx/README.md ./src/lfx/
+COPY sdk/pyproject.toml sdk/README.md ./src/sdk/
+COPY langflow-stepflow/pyproject.toml langflow-stepflow/README.md ./src/langflow-stepflow/
+COPY bundles/ ./src/bundles/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --extra postgresql --no-default-groups --no-install-workspace
 
-COPY src/backend/ ./src/backend/
-COPY src/lfx/ ./src/lfx/
-COPY src/sdk/ ./src/sdk/
-COPY src/langflow-stepflow/ ./src/langflow-stepflow/
+COPY backend/ ./src/backend/
+COPY lfx/ ./src/lfx/
+COPY sdk/ ./src/sdk/
+COPY langflow-stepflow/ ./src/langflow-stepflow/
 COPY --from=frontend-builder /app/src/frontend/build/ ./src/backend/base/langflow/frontend/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -85,7 +86,6 @@ COPY --from=builder-base /usr/local/bin/uv /usr/local/bin/uv
 COPY --from=uv-installer /uvx /usr/local/bin/uvx
 COPY --from=builder-base /usr/local/bin/node /usr/local/bin/node
 COPY --from=builder-base /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY docker/install_hardened_npm.sh /tmp/install_hardened_npm.sh
 
 RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \

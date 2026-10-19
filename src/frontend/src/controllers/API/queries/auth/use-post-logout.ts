@@ -10,9 +10,15 @@ import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
 
-export const useLogout: useMutationFunctionType<undefined, void> = (
-  options?,
-) => {
+interface LogoutResponse {
+  logout_url?: string;
+}
+
+export const useLogout: useMutationFunctionType<
+  undefined,
+  void,
+  LogoutResponse
+> = (options?) => {
   const { mutate, queryClient } = UseRequestProcessor();
   const cookies = getCookiesInstance();
   const logout = useAuthStore((state) => state.logout);
@@ -29,12 +35,12 @@ export const useLogout: useMutationFunctionType<undefined, void> = (
     if (autoLogin) {
       return {};
     }
-    const res = await api.post(`${getURL("LOGOUT")}`);
+    const res = await api.post<LogoutResponse>(`${getURL("LOGOUT")}`);
     return res.data;
   }
 
   const mutation = mutate(["useLogout"], logoutUser, {
-    onSuccess: () => {
+    onSuccess: (data) => {
       logout();
 
       useFlowStore.getState().resetFlowState();
@@ -43,6 +49,9 @@ export const useLogout: useMutationFunctionType<undefined, void> = (
 
       // Clear all React Query cache to prevent data leakage between users
       queryClient.clear();
+      if (data?.logout_url) {
+        window.location.assign(data.logout_url);
+      }
     },
     onError: (error) => {
       console.error(error);

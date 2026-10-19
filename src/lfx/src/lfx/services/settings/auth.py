@@ -170,13 +170,23 @@ class AuthSettings(BaseSettings):
 
     SSO_CONFIG_FILE: str | None = Field(
         default=None,
-        description="Path to SSO configuration file (YAML format). Required when SSO_ENABLED=true.",
+        description=(
+            "Path to a declarative YAML SSO bootstrap file. It is applied to the database at startup; "
+            "`${VARIABLE}` references resolve from the process environment."
+        ),
     )
-    """Path to YAML configuration file for SSO settings. Contains provider-specific configuration."""
+    """Path to the declarative SSO bootstrap configuration."""
 
     SSO_REDIRECT_URL: str | None = Field(
         default=None,
         description="Same-origin relative URL used after SSO authentication. Absolute URLs are rejected.",
+    )
+    SSO_EMERGENCY_USERNAMES: str = Field(
+        default="",
+        description=(
+            "Comma-separated superuser usernames permitted to use password login while SSO is enabled. "
+            "Leave empty to disable all local password logins."
+        ),
     )
 
     # External trusted-identity settings.

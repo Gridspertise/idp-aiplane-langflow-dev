@@ -290,6 +290,8 @@
   "auth.saveApiKeySuccess": "La clé API a été enregistrée avec succès",
   "auth.saveWithApiCheckbox": "Enregistrez avec mes clés API",
   "auth.signInButton": "Connexion",
+  "auth.ssoDivider": "ou",
+  "auth.continueWith": "Continuer avec {{provider}}",
   "auth.signInLink": "Connexion",
   "auth.signInPrompt": "Vous avez déjà un compte? Connexion",
   "auth.signUpLink": "S'inscrire",

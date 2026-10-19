@@ -306,6 +306,8 @@
   "auth.passwordPlaceholder": "Password",
   "auth.passwordRequired": "Please enter your password",
   "auth.signInButton": "Sign in",
+  "auth.ssoDivider": "or",
+  "auth.continueWith": "Continue with {{provider}}",
   "auth.noAccount": "Don't have an account?",
   "auth.signUpLink": "Sign Up",
   "auth.haveAccount": "Already have an account?",

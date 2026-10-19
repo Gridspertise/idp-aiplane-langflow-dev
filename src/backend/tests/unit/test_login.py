@@ -137,6 +137,49 @@ async def test_login_unsuccessful_wrong_password(client, test_user, async_sessio
     assert response.json()["detail"] == "Incorrect username or password"
 
 
+async def test_sso_local_login_requires_configured_superuser(client):
+    """SSO mode reserves password login for explicitly configured local superusers."""
+    settings = get_settings_service().auth_settings
+    original_enabled = settings.SSO_ENABLED
+    original_emergency_usernames = settings.SSO_EMERGENCY_USERNAMES
+    settings.SSO_ENABLED = True
+    settings.SSO_EMERGENCY_USERNAMES = "emergency-admin, regular-user"
+    async with session_scope() as session:
+        session.add_all(
+            [
+                User(
+                    username="emergency-admin",
+                    password=get_auth_service().get_password_hash("emergency-password"),
+                    is_active=True,
+                    is_superuser=True,
+                ),
+                User(
+                    username="regular-user",
+                    password=get_auth_service().get_password_hash("regular-password"),
+                    is_active=True,
+                    is_superuser=False,
+                ),
+            ]
+        )
+        await session.commit()
+
+    try:
+        admin_response = await client.post(
+            "api/v1/login",
+            data={"username": "emergency-admin", "password": "emergency-password"},
+        )
+        regular_response = await client.post(
+            "api/v1/login",
+            data={"username": "regular-user", "password": "regular-password"},
+        )
+    finally:
+        settings.SSO_ENABLED = original_enabled
+        settings.SSO_EMERGENCY_USERNAMES = original_emergency_usernames
+
+    assert regular_response.status_code == 401
+    assert admin_response.status_code == 200
+
+
 async def test_login_rejects_legacy_default_superuser_password_when_auto_login_enabled(client):
     settings = get_settings_service()
     original_auto_login = settings.auth_settings.AUTO_LOGIN

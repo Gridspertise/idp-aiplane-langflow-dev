@@ -506,6 +506,25 @@ class TestSSOConfig:
         with pytest.raises(ValidationError, match="absolute HTTP"):
             OIDCProviderSettings(discovery_url=malformed_url)
 
+    @pytest.mark.parametrize(
+        "invalid_origin",
+        [
+            "https://frontend.example/login",
+            "https://frontend.example?next=/home",
+            "https://user:password@frontend.example",
+            "https://frontend.example#home",
+            "ftp://frontend.example",
+        ],
+    )
+    async def test_post_login_redirect_origin_requires_an_http_origin(self, invalid_origin):
+        with pytest.raises(ValidationError, match="post_login_redirect_origin"):
+            OIDCProviderSettings(post_login_redirect_origin=invalid_origin)
+
+    async def test_post_login_redirect_origin_normalizes_a_trailing_slash(self):
+        settings = OIDCProviderSettings(post_login_redirect_origin="http://localhost:3000/")
+
+        assert settings.post_login_redirect_origin == "http://localhost:3000"
+
     async def test_external_schemas_do_not_accept_audit_actor_fields(self, sso_secret_settings):
         actor_id = uuid4()
         with pytest.raises(ValidationError, match="created_by"):
