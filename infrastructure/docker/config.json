@@ -1,5 +1,5 @@
 {
   "PIPELINE_NAME": "std-docker-app-v1",
   "BUILD_COMMAND": "",
-  "SONAR_DIR": "/src"
+  "SONAR_DIR": "./"
 }
