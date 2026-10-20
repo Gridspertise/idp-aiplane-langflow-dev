@@ -2,7 +2,6 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: langflow
-  namespace: __TARGET_NAMESPACE__
   annotations:
     haproxy.router.openshift.io/timeout: 300s
     haproxy.router.openshift.io/set-forwarded-headers: replace
@@ -23,7 +22,6 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: langflow-api
-  namespace: __TARGET_NAMESPACE__
   annotations:
     haproxy.router.openshift.io/timeout: 300s
     haproxy.router.openshift.io/set-forwarded-headers: replace
@@ -44,7 +42,6 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: langflow-health
-  namespace: __TARGET_NAMESPACE__
   annotations:
     haproxy.router.openshift.io/timeout: 300s
     haproxy.router.openshift.io/set-forwarded-headers: replace

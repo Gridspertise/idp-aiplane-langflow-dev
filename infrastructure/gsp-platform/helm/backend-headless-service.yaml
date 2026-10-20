@@ -2,7 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: langflow-service-service
-  namespace: __TARGET_NAMESPACE__
 spec:
   clusterIP: None
   selector:

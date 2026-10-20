@@ -2,7 +2,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: langflow-sso-bootstrap
-  namespace: __TARGET_NAMESPACE__
 data:
   sso-bootstrap.yaml: |
     providers:
