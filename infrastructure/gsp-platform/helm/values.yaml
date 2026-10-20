@@ -124,7 +124,7 @@ langflow-ide:
             name: langflow-sso-bootstrap
         - name: postgres-ca
           secret:
-            secretName: langflow-postgres-ca
+            secretName: idp-aiplane-langflow-postgres-ca
             items:
               - key: ca.crt
                 path: ca.crt
