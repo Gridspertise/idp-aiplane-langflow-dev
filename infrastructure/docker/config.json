@@ -2,7 +2,7 @@
   "PIPELINE_NAME": "std-docker-app-v1",
   "BUILD_COMMAND": "",
   "SONAR_DIR": "./",
-      "X64":"yes",
-    "ARM64":"yes"
+  "X64":"yes",
+    "ARM64":"no"
 
 }
