@@ -1,0 +1,146 @@
+langflow-ide:
+  fullnameOverride: langflow-service
+  nameOverride: langflow-service
+  imagePullSecrets: []
+  # OpenShift Routes expose the application, including its packaged React UI.
+  ingress:
+    enabled: false
+  postgresql:
+    # PostgreSQL is managed by CloudNativePG, not the bundled Bitnami subchart.
+    enabled: false
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    allowPrivilegeEscalation: false
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  langflow:
+    backend:
+      replicaCount: 1
+      backendOnly: false
+      numWorkers: 1
+      image:
+        repository: quay.apps.rosa.mgmt-cluster.3mu6.p3.openshiftapps.com/gridspertise.platform/idp-aiplane-langflow
+        tag: feature-addsso
+        imagePullPolicy: IfNotPresent
+      service:
+        type: ClusterIP
+        port: 7860
+      # CloudNativePG generates the complete connection URI and credentials.
+      externalDatabase:
+        enabled: false
+      sqlite:
+        enabled: false
+      env:
+        - name: LANGFLOW_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: langflow-postgres-app
+              key: fqdn-uri
+        - name: PGSSLMODE
+          value: verify-full
+        - name: PGSSLROOTCERT
+          value: /etc/langflow/postgres/ca.crt
+        - name: LANGFLOW_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: langflow-secrets
+              key: LANGFLOW_SECRET_KEY
+        - name: LANGFLOW_SUPERUSER
+          valueFrom:
+            secretKeyRef:
+              name: langflow-secrets
+              key: LANGFLOW_SUPERUSER
+        - name: LANGFLOW_SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: langflow-secrets
+              key: LANGFLOW_SUPERUSER_PASSWORD
+        - name: LANGFLOW_SSO_EMERGENCY_USERNAMES
+          valueFrom:
+            secretKeyRef:
+              name: langflow-secrets
+              key: LANGFLOW_SSO_EMERGENCY_USERNAMES
+        - name: KEYCLOAK_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: langflow-secrets
+              key: KEYCLOAK_CLIENT_SECRET
+        - name: LANGFLOW_AUTO_LOGIN
+          value: "false"
+        - name: LANGFLOW_ENABLE_SIGNUP
+          value: "false"
+        - name: LANGFLOW_SSO_ENABLED
+          value: "true"
+        - name: LANGFLOW_SSO_CONFIG_FILE
+          value: /etc/langflow/sso/sso-bootstrap.yaml
+        - name: LANGFLOW_SSO_REDIRECT_URL
+          value: /home
+        - name: LANGFLOW_WORKERS
+          value: "1"
+        - name: LANGFLOW_CONFIG_DIR
+          value: /app/data
+        - name: LANGFLOW_ALEMBIC_LOG_TO_STDOUT
+          value: "true"
+        - name: LANGFLOW_UPDATE_STARTER_PROJECTS
+          value: "false"
+        - name: LANGFLOW_ACCESS_SECURE
+          value: "true"
+        - name: LANGFLOW_REFRESH_SECURE
+          value: "true"
+        - name: LANGFLOW_RATE_LIMIT_TRUST_PROXY
+          value: "true"
+      # This upstream chart does not expose startupProbe; allow time for migrations.
+      probe:
+        initialDelaySeconds: 90
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 60
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: "2"
+          memory: 4Gi
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: flows
+          emptyDir: {}
+        - name: data
+          persistentVolumeClaim:
+            claimName: langflow-data
+        - name: sso-bootstrap
+          configMap:
+            name: langflow-sso-bootstrap
+        - name: postgres-ca
+          secret:
+            secretName: langflow-postgres-ca
+            items:
+              - key: ca.crt
+                path: ca.crt
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: flows
+          mountPath: /app/flows
+        - name: data
+          mountPath: /app/data
+        - name: sso-bootstrap
+          mountPath: /etc/langflow/sso
+          readOnly: true
+        - name: postgres-ca
+          mountPath: /etc/langflow/postgres
+          readOnly: true
+    frontend:
+      # The React UI is served by Langflow, not a separate Nginx deployment.
+      enabled: false

@@ -1,0 +1,62 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: langflow
+  namespace: __TARGET_NAMESPACE__
+  annotations:
+    haproxy.router.openshift.io/timeout: 300s
+    haproxy.router.openshift.io/set-forwarded-headers: replace
+spec:
+  subdomain: ai-portal
+  path: /
+  to:
+    kind: Service
+    name: langflow-service-backend
+  port:
+    targetPort: 7860
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: langflow-api
+  namespace: __TARGET_NAMESPACE__
+  annotations:
+    haproxy.router.openshift.io/timeout: 300s
+    haproxy.router.openshift.io/set-forwarded-headers: replace
+spec:
+  subdomain: ai-portal
+  path: /api
+  to:
+    kind: Service
+    name: langflow-service-backend
+  port:
+    targetPort: 7860
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: langflow-health
+  namespace: __TARGET_NAMESPACE__
+  annotations:
+    haproxy.router.openshift.io/timeout: 300s
+    haproxy.router.openshift.io/set-forwarded-headers: replace
+spec:
+  subdomain: ai-portal
+  path: /health
+  to:
+    kind: Service
+    name: langflow-service-backend
+  port:
+    targetPort: 7860
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

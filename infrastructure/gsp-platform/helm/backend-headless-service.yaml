@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: langflow-service-service
+  namespace: __TARGET_NAMESPACE__
+spec:
+  clusterIP: None
+  selector:
+    app: langflow-service
+    release: langflow
+    langflow-scope: backend
+  ports:
+    - name: http
+      port: 7860
+      targetPort: http

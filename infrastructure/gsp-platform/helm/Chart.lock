@@ -1,0 +1,6 @@
+dependencies:
+- name: langflow-ide
+  repository: https://langflow-ai.github.io/langflow-helm-charts
+  version: 0.1.2
+digest: sha256:34403a0b415589883eb3f1957adba0f99068973d80ee08db21760faf7a3432f5
+generated: "2026-10-20T10:59:21.289162+02:00"

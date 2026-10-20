@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: langflow-sso-bootstrap
+  namespace: __TARGET_NAMESPACE__
+data:
+  sso-bootstrap.yaml: |
+    providers:
+      - slug: keycloak
+        display_name: Keycloak
+        enabled: true
+        client_secret: ${KEYCLOAK_CLIENT_SECRET}
+        provider_settings:
+          protocol: oidc
+          client_id: langflow
+          discovery_url: https://keycloak.apps.rosa.gsp-dpnp-hcp.3qm8.p3.openshiftapps.com/realms/gridspertise/.well-known/openid-configuration
+          redirect_uri: https://ai-portal.apps.rosa.gsp-dpnp-hcp.3qm8.p3.openshiftapps.com/api/v1/sso/keycloak/callback
+          post_logout_redirect_uri: https://ai-portal.apps.rosa.gsp-dpnp-hcp.3qm8.p3.openshiftapps.com/login
