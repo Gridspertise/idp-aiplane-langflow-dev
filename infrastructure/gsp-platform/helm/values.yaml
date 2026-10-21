@@ -52,27 +52,27 @@ langflow-ide:
         - name: LANGFLOW_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: idp-aiplane-langflow
+              name: idp-aiplane-langflow-secrets
               key: LANGFLOW_SECRET_KEY
         - name: LANGFLOW_SUPERUSER
           valueFrom:
             secretKeyRef:
-              name: idp-aiplane-langflow
+              name: idp-aiplane-langflow-secrets
               key: LANGFLOW_SUPERUSER
         - name: LANGFLOW_SUPERUSER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: idp-aiplane-langflow
+              name: idp-aiplane-langflow-secrets
               key: LANGFLOW_SUPERUSER_PASSWORD
         - name: LANGFLOW_SSO_EMERGENCY_USERNAMES
           valueFrom:
             secretKeyRef:
-              name: idp-aiplane-langflow
+              name: idp-aiplane-langflow-secrets
               key: LANGFLOW_SSO_EMERGENCY_USERNAMES
         - name: KEYCLOAK_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-              name: idp-aiplane-langflow
+              name: idp-aiplane-langflow-secrets
               key: KEYCLOAK_CLIENT_SECRET
         - name: LANGFLOW_AUTO_LOGIN
           value: "false"
@@ -82,6 +82,11 @@ langflow-ide:
           value: "true"
         - name: LANGFLOW_SSO_CONFIG_FILE
           value: /etc/langflow/sso/sso-bootstrap.yaml
+        - name: LANGFLOW_SSO_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: idp-aiplane-langflow-secrets
+              key: LANGFLOW_SSO_CLIENT_SECRET
         - name: LANGFLOW_SSO_REDIRECT_URL
           value: /home
         - name: LANGFLOW_WORKERS
