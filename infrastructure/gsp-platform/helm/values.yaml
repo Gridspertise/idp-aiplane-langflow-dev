@@ -138,6 +138,12 @@ langflow-ide:
             items:
               - key: ca.crt
                 path: ca.crt
+        - name: rds-ca
+          configMap:
+            name: idp-aiplane-langflow-rds-ca
+            items:
+              - key: eu-north-1-bundle.pem
+                path: eu-north-1-bundle.pem
       volumeMounts:
         - name: tmp
           mountPath: /tmp
@@ -150,6 +156,9 @@ langflow-ide:
           readOnly: true
         - name: postgres-ca
           mountPath: /etc/langflow/postgres
+          readOnly: true
+        - name: rds-ca
+          mountPath: /etc/langflow/rds-ca
           readOnly: true
     frontend:
       # The React UI is served by Langflow, not a separate Nginx deployment.
