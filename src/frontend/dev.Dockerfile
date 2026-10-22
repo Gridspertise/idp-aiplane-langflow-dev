@@ -1,5 +1,5 @@
 #baseline
-FROM node:21-bookworm-slim AS base
+FROM node:24.22.1-bookworm-slim AS base
 RUN mkdir -p /home/node/app
 RUN chown -R node:node /home/node && chmod -R 770 /home/node
 RUN apt-get update && apt-get install -y jq

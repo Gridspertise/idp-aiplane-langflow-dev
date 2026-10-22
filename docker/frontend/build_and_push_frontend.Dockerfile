@@ -6,7 +6,7 @@
 ################################
 
 # 1. force platform to the current architecture to increase build speed time on multi-platform builds
-FROM --platform=$BUILDPLATFORM node:lts-bookworm-slim AS builder-base
+FROM --platform=$BUILDPLATFORM node:24.22.1-bookworm-slim AS builder-base
 COPY src/frontend /frontend
 
 # PUPPETEER_SKIP_DOWNLOAD: puppeteer (via accessibility-checker, test-only)
