@@ -59,7 +59,7 @@ COPY langflow-stepflow/pyproject.toml langflow-stepflow/README.md ./src/langflow
 COPY bundles/ ./src/bundles/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --extra postgresql --no-default-groups --no-install-workspace
+    uv sync --frozen --extra postgresql --extra pgvector --no-default-groups --no-install-workspace
 
 COPY backend/ ./src/backend/
 COPY lfx/ ./src/lfx/
@@ -68,7 +68,7 @@ COPY langflow-stepflow/ ./src/langflow-stepflow/
 COPY --from=frontend-builder /app/src/frontend/build/ ./src/backend/base/langflow/frontend/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --extra postgresql --no-default-groups --no-editable \
+    uv sync --frozen --extra postgresql --extra pgvector --no-default-groups --no-editable \
     && uv pip check --python /app/.venv/bin/python \
     && test -x /app/.venv/bin/langflow \
     && /app/.venv/bin/python -c \
