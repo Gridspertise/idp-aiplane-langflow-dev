@@ -45,6 +45,11 @@ langflow-ide:
             secretKeyRef:
               name: idp-aiplane-langflow-postgres-app
               key: fqdn-uri
+        - name: PGVECTOR_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: idp-aiplane-langflow-secrets
+              key: PGVECTOR_CONNECTION_STRING
         - name: PGSSLMODE
           value: verify-full
         - name: PGSSLROOTCERT
