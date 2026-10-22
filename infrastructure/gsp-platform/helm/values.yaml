@@ -30,7 +30,7 @@ langflow-ide:
       image:
         repository: quay.apps.rosa.mgmt-cluster.3mu6.p3.openshiftapps.com/gridspertise.platform/idp-aiplane-langflow
         tag: feature-addsso
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
       service:
         type: ClusterIP
         port: 7860
