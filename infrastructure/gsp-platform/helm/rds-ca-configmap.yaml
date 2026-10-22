@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: idp-aiplane-langflow-rds-ca
-  namespace: gsp-platform
+  namespace: __TARGET_NAMESPACE__
 data:
   eu-north-1-bundle.pem: |
     -----BEGIN CERTIFICATE-----
