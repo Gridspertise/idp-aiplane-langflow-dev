@@ -26,7 +26,7 @@ metadata:
     - "systemid#aiplane"
     - "component#langflow"
 spec:
-  type: docker-image
+  type: platform-component
   lifecycle: production
   owner: group:gridspertise/platform-developer
   dependsOn:

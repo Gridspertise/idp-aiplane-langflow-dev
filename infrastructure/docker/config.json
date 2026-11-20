@@ -3,6 +3,6 @@
   "BUILD_COMMAND": "",
   "SONAR_DIR": "./",
   "X64":"yes",
-    "ARM64":"no"
+  "ARM64":"no"
 
 }
