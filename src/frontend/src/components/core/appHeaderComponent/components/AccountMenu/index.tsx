@@ -28,6 +28,7 @@ export const AccountMenu = () => {
   const { mutate: mutationLogout } = useLogout();
   const hideLogoutButton = useUtilityStore((state) => state.hideLogoutButton);
   const autoLogin = useAuthStore((state) => state.autoLogin);
+  const username = useAuthStore((state) => state.userData?.username);
 
   const handleLogout = () => {
     mutationLogout();
@@ -55,6 +56,15 @@ export const AccountMenu = () => {
       <HeaderMenuItems position="right" classNameSize="w-[272px]">
         <div className="divide-y divide-foreground/10">
           <CustomHeaderMenuItemsTitle />
+          {username && (
+            <div
+              className="truncate px-4 py-3 text-sm font-medium"
+              data-testid="account-menu-username"
+              title={username}
+            >
+              {username}
+            </div>
+          )}
           <div>
             <div className="h-[44px] items-center px-4 pt-3">
               <div className="flex items-center justify-between">

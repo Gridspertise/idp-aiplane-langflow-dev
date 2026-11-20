@@ -299,6 +299,9 @@ def get_lifespan(*, fix_migration=False, version=None):
             # so each worker rebuilds its own connection pool (idempotent otherwise).
             await initialize_services(fix_migration=fix_migration)
             await initialize_environment_variables()
+            from langflow.services.auth.sso_bootstrap import bootstrap_sso_configs
+
+            await bootstrap_sso_configs()
             from langflow.services.knowledge_base_storage.coordinator import fence_legacy_records, schedule_upgrade
 
             await fence_legacy_records()

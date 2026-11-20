@@ -945,6 +945,10 @@ class AuthService(BaseAuthService):
         identity = identity_from_claims(claims, self.settings.auth_settings)
         return await self._materialize_external_user(identity, db)
 
+    async def get_or_create_user_from_identity(self, identity: ExternalIdentity, db: AsyncSession) -> User:
+        """Return the local user mapped to a verified, normalized external identity."""
+        return await self._materialize_external_user(identity, db)
+
     async def _materialize_external_user(self, identity: ExternalIdentity, db: AsyncSession) -> User:
         """Find-or-create the local user backing an external identity."""
         import secrets

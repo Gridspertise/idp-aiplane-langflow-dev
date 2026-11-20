@@ -290,6 +290,8 @@
   "auth.saveApiKeySuccess": "API密钥已成功保存",
   "auth.saveWithApiCheckbox": "使用我的 API 密钥节省开支",
   "auth.signInButton": "登录",
+  "auth.ssoDivider": "或",
+  "auth.continueWith": "使用 {{provider}} 继续",
   "auth.signInLink": "登录",
   "auth.signInPrompt": "已有账户？登录",
   "auth.signUpLink": "注册",

@@ -4,12 +4,22 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from lfx.log.logger import logger
 from pydantic import BaseModel
+from sqlmodel import select
 
 from langflow.api.utils import DbSession
 from langflow.api.v1.schemas import Token
+from langflow.api.v1.sso import _OIDC_FEDERATED_SESSION_COOKIE, set_federated_session_cookie
 from langflow.initial_setup.setup import get_or_create_default_folder
 from langflow.services.auth.exceptions import AuthenticationError
+from langflow.services.auth.oidc import (
+    OIDCAuthenticationError,
+    decrypt_federated_session,
+    end_session_url,
+    resolve_provider_metadata,
+)
+from langflow.services.database.models.auth.sso import SSOConfig
 from langflow.services.database.models.user.crud import get_user_by_id
 from langflow.services.database.models.user.model import UserRead
 from langflow.services.deps import get_auth_service, get_settings_service, get_variable_service
@@ -31,6 +41,26 @@ class SessionResponse(BaseModel):
     store_api_key: str | None = None
 
 
+class LogoutResponse(BaseModel):
+    """A completed local logout and an optional browser redirect to the IdP."""
+
+    message: str
+    logout_url: str | None = None
+
+
+def _is_configured_emergency_username(username: str) -> bool:
+    """Return whether an account is explicitly designated for emergency login."""
+    auth_settings = get_settings_service().auth_settings
+    if not auth_settings.SSO_ENABLED:
+        return True
+    allowed = {
+        configured.casefold()
+        for configured in auth_settings.SSO_EMERGENCY_USERNAMES.split(",")
+        if configured.strip()
+    }
+    return username.casefold() in allowed
+
+
 @router.post("/login", response_model=Token, include_in_schema=False)
 async def login_to_get_access_token(
     request: Request,
@@ -41,6 +71,12 @@ async def login_to_get_access_token(
     """Login endpoint with rate limiting applied via app.state.limiter."""
     # Check rate limit (limiter is initialized in main.py after settings load)
     check_rate_limit(request)
+    if not _is_configured_emergency_username(form_data.username):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     auth_settings = get_settings_service().auth_settings
     try:
@@ -59,6 +95,12 @@ async def login_to_get_access_token(
         ) from exc
 
     if user:
+        if auth_settings.SSO_ENABLED and not user.is_superuser:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         tokens = await auth.create_user_tokens(user_id=user.id, db=db, update_last_login=True)
         response.set_cookie(
             "refresh_token_lf",
@@ -180,6 +222,17 @@ async def refresh_token(
     if token:
         auth = get_auth_service()
         tokens = await auth.create_refresh_token(token, db)
+        encrypted_session = request.cookies.get(_OIDC_FEDERATED_SESSION_COOKIE)
+        if encrypted_session:
+            try:
+                federated_session = decrypt_federated_session(
+                    encrypted_session,
+                    get_settings_service(),
+                    max_age_seconds=auth_settings.REFRESH_TOKEN_EXPIRE_SECONDS,
+                )
+                set_federated_session_cookie(response, federated_session.provider_slug)
+            except OIDCAuthenticationError:
+                await logger.adebug("OIDC federated session cookie was invalid during refresh")
         response.set_cookie(
             "refresh_token_lf",
             tokens["refresh_token"],
@@ -245,9 +298,33 @@ async def get_session(
         return SessionResponse(authenticated=False)
 
 
-@router.post("/logout", include_in_schema=False)
-async def logout(response: Response):
+@router.post("/logout", response_model=LogoutResponse, include_in_schema=False)
+async def logout(request: Request, response: Response, db: DbSession) -> LogoutResponse:
+    """Clear Langflow cookies and return a safe Keycloak logout redirect when applicable."""
     auth_settings = get_settings_service().auth_settings
+    logout_url = None
+    encrypted_session = request.cookies.get(_OIDC_FEDERATED_SESSION_COOKIE)
+    if encrypted_session:
+        try:
+            federated_session = decrypt_federated_session(
+                encrypted_session,
+                get_settings_service(),
+                max_age_seconds=auth_settings.REFRESH_TOKEN_EXPIRE_SECONDS,
+            )
+            config = (
+                await db.exec(
+                    select(SSOConfig).where(
+                        SSOConfig.slug == federated_session.provider_slug,
+                        SSOConfig.enabled == True,  # noqa: E712
+                        SSOConfig.protocol == "oidc",
+                    )
+                )
+            ).first()
+            if config is not None:
+                logout_url = end_session_url(config, await resolve_provider_metadata(config))
+        except OIDCAuthenticationError:
+            await logger.awarning("OIDC federated logout could not be prepared")
+
 
     response.delete_cookie(
         "refresh_token_lf",
@@ -270,4 +347,12 @@ async def logout(response: Response):
         secure=auth_settings.ACCESS_SECURE,
         domain=auth_settings.COOKIE_DOMAIN,
     )
-    return {"message": "Logout successful"}
+    response.delete_cookie(
+        _OIDC_FEDERATED_SESSION_COOKIE,
+        httponly=True,
+        samesite="lax",
+        secure=auth_settings.REFRESH_SECURE,
+        domain=auth_settings.COOKIE_DOMAIN,
+        path="/",
+    )
+    return LogoutResponse(message="Logout successful", logout_url=logout_url)

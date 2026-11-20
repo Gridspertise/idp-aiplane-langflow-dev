@@ -4,6 +4,10 @@ import { useUtilityStore } from "@/stores/utilityStore";
 import { AccountMenu } from "../index";
 
 const mockNavigate = jest.fn();
+let mockAuthState = {
+  autoLogin: false,
+  userData: { username: "testuser" } as { username: string } | null,
+};
 
 jest.mock("react-icons/fa", () => ({
   FaDiscord: () => <span data-testid="discord-icon" />,
@@ -43,8 +47,12 @@ jest.mock("@/customization/feature-flags", () => ({
 
 jest.mock("@/stores/authStore", () => ({
   __esModule: true,
-  default: (selector: (state: { autoLogin: boolean }) => unknown) =>
-    selector({ autoLogin: false }),
+  default: (
+    selector: (state: {
+      autoLogin: boolean;
+      userData: { username: string } | null;
+    }) => unknown,
+  ) => selector(mockAuthState),
 }));
 
 jest.mock("@/stores/darkStore", () => ({
@@ -81,6 +89,10 @@ jest.mock("../../ThemeButtons/index", () => ({
 describe("AccountMenu", () => {
   beforeEach(() => {
     mockNavigate.mockClear();
+    mockAuthState = {
+      autoLogin: false,
+      userData: { username: "testuser" },
+    };
     act(() => {
       useUtilityStore.setState({ hideLogoutButton: false });
     });
@@ -116,6 +128,14 @@ describe("AccountMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: /settings/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/settings");
+  });
+
+  it("shows the authenticated user's name", () => {
+    render(<AccountMenu />);
+
+    expect(screen.getByTestId("account-menu-username")).toHaveTextContent(
+      "testuser",
+    );
   });
 
   it("renders the community links through the customization seam", () => {

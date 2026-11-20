@@ -39,6 +39,7 @@ _OIDC_REMOTE_URL_FIELDS = (
     "authorization_endpoint",
     "jwks_uri",
     "issuer",
+    "post_logout_redirect_uri",
 )
 
 
@@ -59,6 +60,8 @@ class OIDCProviderSettings(BaseModel):
     protocol: Literal["oidc"] = "oidc"
     discovery_url: str | None = None
     redirect_uri: str | None = None
+    post_login_redirect_origin: str | None = None
+    post_logout_redirect_uri: str | None = None
     scopes: str | None = "openid email profile"
     token_endpoint: str | None = None
     authorization_endpoint: str | None = None
@@ -76,6 +79,41 @@ class OIDCProviderSettings(BaseModel):
             msg = "OIDC client_id must not be blank"
             raise ValueError(msg)
         return value
+
+    @field_validator("post_login_redirect_origin", mode="before")
+    @classmethod
+    def validate_post_login_redirect_origin(cls, value: object) -> object:
+        """Allow a trusted application origin for redirects after the OIDC callback."""
+        if value is None or not isinstance(value, str):
+            return value
+        value = value.strip()
+        if not value:
+            msg = "OIDC post_login_redirect_origin must not be blank"
+            raise ValueError(msg)
+
+        parsed = urlsplit(value)
+        try:
+            is_origin = (
+                parsed.scheme.lower() in {"http", "https"}
+                and parsed.hostname is not None
+                and parsed.path in {"", "/"}
+                and not parsed.username
+                and not parsed.password
+                and not parsed.query
+                and not parsed.fragment
+                and not any(character.isspace() for character in value)
+                and _INVALID_PERCENT_ESCAPE_PATTERN.search(value) is None
+            )
+            if is_origin:
+                _ = parsed.port
+                _HTTP_URL_ADAPTER.validate_python(value)
+        except ValueError:
+            is_origin = False
+
+        if not is_origin:
+            msg = "OIDC post_login_redirect_origin must be an absolute HTTP(S) origin without a path"
+            raise ValueError(msg)
+        return value.rstrip("/")
 
     @field_validator(*_OIDC_REMOTE_URL_FIELDS, mode="before")
     @classmethod
@@ -552,6 +590,7 @@ class SSOConfigCreate(SQLModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    slug: str | None = None
     display_name: str
     protocol: Literal["oidc"] = "oidc"
     enabled: bool = False
@@ -589,7 +628,7 @@ class SSOConfigCreate(SQLModel):
         """Build the persistence model, encrypting plaintext before it reaches the table."""
         from langflow.services.database.models.auth.sso_secret import encrypt_sso_client_secret
 
-        values = self.model_dump(exclude={"client_secret"})
+        values = self.model_dump(exclude={"client_secret"}, exclude_none=True)
         if self.client_secret is not None:
             values["client_secret_encrypted"] = encrypt_sso_client_secret(
                 self.client_secret.get_secret_value(),

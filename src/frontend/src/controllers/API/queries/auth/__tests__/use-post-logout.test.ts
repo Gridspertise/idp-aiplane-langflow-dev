@@ -126,6 +126,7 @@ describe("logout functionality", () => {
 
       expect(mockQueryClient.clear).toHaveBeenCalled();
     });
+
   });
 
   describe("logout behavior with auto login enabled", () => {

@@ -290,6 +290,8 @@
   "auth.saveApiKeySuccess": "APIキーの保存に成功しました",
   "auth.saveWithApiCheckbox": "私のAPIキーを使って節約しましょう",
   "auth.signInButton": "サインイン",
+  "auth.ssoDivider": "または",
+  "auth.continueWith": "{{provider}} で続行",
   "auth.signInLink": "サインイン",
   "auth.signInPrompt": "すでにアカウントをお持ちですか？サインイン",
   "auth.signUpLink": "登録",

@@ -230,6 +230,15 @@ class BaseAuthService(Service, abc.ABC):
         msg = f"{self.__class__.__name__} does not support JIT provisioning."
         raise NotImplementedError(msg)
 
+    async def get_or_create_user_from_identity(self, identity: Any, db: Any) -> Any:
+        """Get or create a user from a normalized external identity.
+
+        OIDC browser-login adapters must pass a normalized identity rather than
+        mutating process-wide claim-mapping settings for one request.
+        """
+        msg = f"{self.__class__.__name__} does not support normalized external identities."
+        raise NotImplementedError(msg)
+
     def extract_user_info_from_claims(self, claims: dict) -> dict:
         """Extract user info from provider claims. Override for OIDC/SAML."""
         msg = f"{self.__class__.__name__} does not extract user info from claims."

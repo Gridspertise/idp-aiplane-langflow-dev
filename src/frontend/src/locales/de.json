@@ -290,6 +290,8 @@
   "auth.saveApiKeySuccess": "API-Schlüssel erfolgreich gespeichert",
   "auth.saveWithApiCheckbox": "Mit meinen API-Schlüsseln sparen",
   "auth.signInButton": "Anmelden",
+  "auth.ssoDivider": "oder",
+  "auth.continueWith": "Weiter mit {{provider}}",
   "auth.signInLink": "Anmelden",
   "auth.signInPrompt": "Haben Sie bereits ein Konto? Anmelden",
   "auth.signUpLink": "Anmelden",
