@@ -16,10 +16,10 @@ metadata:
 
     backstage.io/source-location: url:https://github.com/Gridspertise/idp-aiplane-langflow-dev
     sonarqube.org/project-key: idp-aiplane-langflow
-    vault.io/secrets-path: gridspertise/platform/idp/langflow
+    vault.io/secrets-path: gridspertise/platform/idp/aiplane/langflow
     tekton.dev/cicd : "true"
     backstage.io/kubernetes-label-selector: idp/component=langflow
-    quay.io/repository-slug: gridspertise.platform/platform-idp-langflow
+    quay.io/repository-slug: gridspertise.platform/idp-aiplane-langflow
   tags:
     - "teamid#platform"
     - "domainid#idp"
